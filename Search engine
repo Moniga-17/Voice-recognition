@@ -1,0 +1,44 @@
+import speech_recognition as sr
+import pyttsx3
+import webbrowser
+
+def speak(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
+def recognize_command():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening for a search query...")
+        speak("What would you like to search on Google?")
+        try:
+            audio = recognizer.listen(source)
+            command = recognizer.recognize_google(audio)
+            print(f"Search query received: {command}")
+            return command.lower()
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't understand that.")
+        except sr.RequestError:
+            speak("Sorry, there seems to be an issue with the speech recognition service.")
+        return None
+
+def search_google(query):
+    speak(f"Searching Google for {query}")
+    search_url = f"https://www.google.com/search?q={query}"
+    webbrowser.open(search_url)
+    print(f"Opened Google search for: {query}")
+
+def main():
+    speak("Google search assistant initialized.")
+    while True:
+        command = recognize_command()
+        if command:
+            if "exit" in command:
+                speak("Exiting the program. Goodbye!")
+                break
+            else:
+                search_google(command)
+
+if __name__ == "__main__":
+    main()
