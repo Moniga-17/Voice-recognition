@@ -1,0 +1,68 @@
+import os
+import speech_recognition as sr
+import pyttsx3
+import subprocess
+
+def speak(text):
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
+def recognize_command():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening for a command...")
+        speak("Please say a command.")
+        try:
+            audio = recognizer.listen(source)
+            command = recognizer.recognize_google(audio)
+            print(f"Command received: {command}")
+            return command.lower()
+        except sr.UnknownValueError:
+            speak("Sorry, I didn't understand that.")
+        except sr.RequestError:
+            speak("Sorry, there seems to be an issue with the speech recognition service.")
+        return None
+
+def execute_command(command):
+    if "go to sleep mode" in command:
+        speak("Putting the computer to sleep...")
+        if os.name == "nt":  # Windows
+            os.system("rundll32.exe powrprof.dll,SetSuspendState 0,1,0")
+        else:
+            speak("Sleep mode is not supported on this system.")
+    elif "open notepad" in command:
+        speak("Opening Notepad...")
+        subprocess.Popen(["notepad.exe"])  # For Windows
+    elif "open calculator" in command:
+        speak("Opening Calculator...")
+        subprocess.Popen(["calc.exe"])  # For Windows
+    elif "shut down the laptop" in command:
+        speak("Shutting down the computer...")
+        if os.name == "nt":  # Windows
+            os.system("shutdown /s /t 1")
+        else:
+            os.system("sudo shutdown now")  # For Linux/Mac
+    elif "restart the laptop" in command:
+        speak("Restarting the computer...")
+        if os.name == "nt":  # Windows
+            os.system("shutdown /r /t 1")
+        else:
+            os.system("sudo shutdown -r now")  # For Linux/Mac
+    elif "exit" in command:
+        speak("Exiting the program. Goodbye!")
+        print("Exiting...")
+        exit()
+    else:
+        speak("I can't perform that task.")
+        print(f"Unknown command: {command}")
+
+def main():
+    speak("Voice-activated command system initialized.")
+    while True:
+        command = recognize_command()
+        if command:
+            execute_command(command)
+
+if __name__ == "__main__":
+    main()
